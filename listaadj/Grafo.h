@@ -992,6 +992,8 @@ Grafo *Grafo::escalonamento()
   {
     livres[i] = -1;
   }
+
+  cout << "aqui";
   
   return 0;
 }
