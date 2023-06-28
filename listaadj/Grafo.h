@@ -946,23 +946,36 @@ bool Grafo::bipartidoCompleto()
     return false;
 }
 
-int encontraMIN(vector<int> &livres)
+int encontraMIN(vector<int> &tempos)
 {
-  int min = INT_MAX, max = INT_MIN;
+  int min = INT_MAX;
 
-  for (int i: livres)
+  for (int i: tempos)
   {
       if (i < min) {
           min = i;
       }
+  }
 
+  auto aux = find(tempos.begin(), tempos.end(), min);
+  int index = aux - tempos.begin();
+
+  return index;
+}
+
+int encontraMAX(vector<int> &tempos)
+{
+  int max = INT_MIN;
+
+  for (int i: tempos)
+  {
       if (i > max) {
           max = i;
       }
   }
 
-  auto aux = find(livres.begin(), livres.end(), min);
-  int index = aux - livres.begin();
+  auto aux = find(tempos.begin(), tempos.end(), max);
+  int index = aux - tempos.begin();
 
   return index;
 }
@@ -997,19 +1010,25 @@ Grafo *Grafo::escalonamento()
   //   cout << a._peso() << " ";
 
   int maq = this->numeroMaquinas();
-  vector<int> livres;
+  vector<int> tempos;
 
   for (int i = 0; i < maq; i++)
   {
-    livres.push_back(-1);
+    tempos.push_back(0);
   }
 
-  cout << encontraMIN(livres) << endl;
+  for (auto a: A)
+  {
+    tempos[encontraMIN(tempos)] += a._peso();
+  }
 
-  livres[encontraMIN(livres)] = 5;
+  for (auto t: tempos)
+  {
+    cout << t << " ";
+  }
   
-  cout << encontraMIN(livres) << endl;
-  
+  cout << endl;
+
   return 0;
 }
 
