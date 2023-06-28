@@ -7,7 +7,7 @@
 #include <array>
 #include <cstring>
 #include <float.h>
-#include <iterator>
+#include <limits.h>
 
 using namespace std;
 
@@ -946,6 +946,27 @@ bool Grafo::bipartidoCompleto()
     return false;
 }
 
+int encontraMIN(vector<int> &livres)
+{
+  int min = INT_MAX, max = INT_MIN;
+
+  for (int i: livres)
+  {
+      if (i < min) {
+          min = i;
+      }
+
+      if (i > max) {
+          max = i;
+      }
+  }
+
+  auto aux = find(livres.begin(), livres.end(), min);
+  int index = aux - livres.begin();
+
+  return index;
+}
+
 Grafo *Grafo::escalonamento()
 {
   Grafo *grafoEsc = new Grafo(this->numVertices);
@@ -958,24 +979,10 @@ Grafo *Grafo::escalonamento()
     if (!this->listaAdjVazia(v))
     {
       Aresta *adj = this->primeiroListaAdj(v);
-      int peso = adj->_peso();
 
       while (adj != NULL )
       {
-        bool index = false;
-        for (auto a : A)
-        {
-          if (adj->_peso() == a._peso())
-          {
-            index = true; 
-          }
-        }
-
-        if (!index)
-        {
-          A.push_back(*adj);
-        }
-        
+        A.push_back(*adj);
         delete adj;
         adj = this->proxAdj(v);
       }
@@ -985,15 +992,23 @@ Grafo *Grafo::escalonamento()
   // ordena as arestas pelo peso
   sort(A.begin(), A.end());
 
+  // Imprimir o vector A ordenado decrescente
+  // for (auto a: A)
+  //   cout << a._peso() << " ";
+
   int maq = this->numeroMaquinas();
-  int *livres = new int[maq];
+  vector<int> livres;
 
   for (int i = 0; i < maq; i++)
   {
-    livres[i] = -1;
+    livres.push_back(-1);
   }
 
-  cout << "aqui";
+  cout << encontraMIN(livres) << endl;
+
+  livres[encontraMIN(livres)] = 5;
+  
+  cout << encontraMIN(livres) << endl;
   
   return 0;
 }
