@@ -946,6 +946,7 @@ bool Grafo::bipartidoCompleto()
     return false;
 }
 
+//indice do menor peso
 int encontraMIN(vector<int> &tempos)
 {
   int min = INT_MAX;
@@ -963,6 +964,7 @@ int encontraMIN(vector<int> &tempos)
   return index;
 }
 
+//indice do maior peso
 int encontraMAX(vector<int> &tempos)
 {
   int max = INT_MIN;
@@ -982,8 +984,10 @@ int encontraMAX(vector<int> &tempos)
 
 Grafo *Grafo::escalonamento()
 {
-  Grafo *grafoEsc = new Grafo(this->numVertices);
 
+  //aresta_v1  aresta_v2  aresta_peso
+  //tarefas    maquinas   peso
+  Grafo *grafoEsc = new Grafo(this->numVertices);
   vector<Aresta> A;
 
   // adiciona as arestas em A
@@ -1017,17 +1021,32 @@ Grafo *Grafo::escalonamento()
     tempos.push_back(0);
   }
 
-  for (auto a: A)
-  {
-    tempos[encontraMIN(tempos)] += a._peso();
-  }
+  cout << "NumArestas:" << this->numeroArestas() << " numTarefas:" << this->numeroTarefas() << endl;
 
-  for (auto t: tempos)
-  {
-    cout << t << " ";
+  int aux=0;
+  //so roda enquanto o numero de arestas for maior que o numero de tarefas
+  while(this->numeroArestas() > this->numeroTarefas()){
+    for (auto a: A)
+    {
+      if(a._peso() != aux){//ignorando as tarefas de peso igual
+        //depois que a tarefa foi inserida em uma maquina, ela não é usada em outras
+        //dessa forma, ignora as tarefas de custo repetido
+        aux = a._peso();
+        grafoEsc->insereAresta(a._v1(), a._v2(), a._peso());//insino no novoGrafo
+      }else{//tarefa que ja foi inserida em alguma maquina não deve ser inserida no novo grafo
+        continue;
+      }
+      
+      tempos[encontraMIN(tempos)] += a._peso();
+    }
+
+    for (auto t: tempos)
+    {
+      cout << t << " ";
+    }
+    
+    cout << endl;
   }
-  
-  cout << endl;
 
   return 0;
 }
