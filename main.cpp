@@ -7,7 +7,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-  ifstream in("input.txt");
+  ifstream in("problema5_1.txt");
   Grafo *grafo = new Grafo(in);
   cout << "Número de Tarefas: " << grafo->numeroTarefas() << endl;
 

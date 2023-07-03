@@ -26,6 +26,10 @@ public:
     int _peso() { return this->peso; }
     int _v1() { return this->v1; }
     int _v2() { return this->v2; }
+    bool operator<(const Aresta &p) const
+    {
+      return peso > p.peso;
+    }
     ~Aresta() {}
   };
 
@@ -51,6 +55,7 @@ public:
   int numeroArestas();
 
   void imprime();
+  void imprime2(int L, int C);
   int _numVertices() const;
   int _numOperacao();
   Grafo *grafoTransposto();
@@ -246,6 +251,21 @@ void Grafo::imprime()
   {
     cout << i << "  ";
     for (int j = this->numeroTarefas() + 1; j <= this->numeroTarefas() + this->numeroMaquinas(); j++)
+      cout << this->mat[i][j] << "   ";
+    cout << endl;
+  }
+}
+
+void Grafo::imprime2(int L, int C)
+{
+  cout << "   ";
+  for (int i = L + 1; i <= L + C; i++)
+    cout << i << "   ";
+  cout << endl;
+  for (int i = 1; i <= L; i++)
+  {
+    cout << i << "  ";
+    for (int j = L + 1; j <= L + C; j++)
       cout << this->mat[i][j] << "   ";
     cout << endl;
   }
@@ -852,34 +872,75 @@ int Grafo::encontrarMenorSomaColuna(int L)
 
 void Grafo::escalonamento()
 {
-  int aux = -1, L = this->numeroTarefas();
+  int aux = -1, verifica = -1, L = this->numeroTarefas(), C = this->numeroMaquinas();
   Grafo *grafoEsc = new Grafo(this->numVertices);
 
+  vector<Aresta> A;
+
+  // adiciona as arestas em A
   for (int v = 1; v <= L; v++)
   {
-    aux = grafoEsc->encontrarMenorSomaColuna(L);
-
-    cout << endl;
-
-    if (this->existeAresta(v, aux))
+    if (!this->listaAdjVazia(v))
     {
-      cout << "v: " << v << " || aux: " << aux << " || peso: " << this->mat[v][aux] << endl;
-      cout << "existe" << endl;
-      grafoEsc->insereAresta(v, aux, this->mat[v][aux]);
-      grafoEsc->imprime();
+      Aresta *adj = this->primeiroListaAdj(v);
+
+      while (adj != NULL)
+      {
+        A.push_back(*adj);
+        delete adj;
+        adj = this->proxAdj(v);
+      }
     }
-    else
-    {
-      cout << "não existe" << endl;
-    }
-    cout << endl;
   }
 
-  cout << "Número de Tarefas: " << grafoEsc->numeroTarefas() << endl;
-  cout << "Número de Máquinas: " << grafoEsc->numeroMaquinas() << endl;
-  cout << "Número de Arestas: " << grafoEsc->numeroArestas() << endl;
-  cout << endl;
-  grafoEsc->imprime();
+  // ordena as arestas pelo peso
+  sort(A.begin(), A.end());
+
+  // Imprimir o vector A ordenado decrescente
+  for (auto a : A)
+  {
+    if (a._v1() != verifica)
+    {
+      cout << a._v1() << " - " << a._peso() << "||";
+      // verifica = a._v1();
+      // aux = grafoEsc->encontrarMenorSomaColuna(L);
+      // if (this->existeAresta(a._v1(), aux))
+      // {
+      //   // cout << "v: " << a._v1() << " || aux: " << aux << " || peso: " << this->mat[a._v1()][aux] << endl;
+      //   // cout << "existe" << endl;
+      //   grafoEsc->insereAresta(a._v1(), aux, this->mat[a._v1()][aux]);
+      //   grafoEsc->imprime2(L, C);
+      // }
+      // else
+      // {
+      //   // cout << "não existe" << endl;
+      // }
+      // cout << endl;
+    }
+  }
+
+  // for (int v = 1; v <= L; v++)
+  // {
+  //   aux = grafoEsc->encontrarMenorSomaColuna(L);
+
+  //   cout << endl;
+
+  //   if (this->existeAresta(v, aux))
+  //   {
+  //     cout << "v: " << v << " || aux: " << aux << " || peso: " << this->mat[v][aux] << endl;
+  //     cout << "existe" << endl;
+  //     grafoEsc->insereAresta(v, aux, this->mat[v][aux]);
+  //     grafoEsc->imprime2(L, C);
+  //   }
+  //   else
+  //   {
+  //     cout << "não existe" << endl;
+  //   }
+  //   cout << endl;
+  // }
+
+  cout << "Resultado Final: " << endl;
+  grafoEsc->imprime2(L, C);
 }
 
 Grafo::~Grafo()
