@@ -9,28 +9,26 @@ int main(int argc, char **argv)
 {
   ifstream in("input.txt");
   Grafo *grafo = new Grafo(in);
-  // grafo->imprime();
+  cout << "Número de Tarefas: " << grafo->numeroTarefas() << endl;
 
-  // cout << endl;
+  cout << "Número de Máquinas: " << grafo->numeroMaquinas() << endl;
 
-  // Grafo *grafoND;
-  // grafoND = grafo->grafoNaoDirecionado();
-  // grafoND->imprime();
+  cout << "Número de Arestas: " << grafo->numeroArestas() << endl;
 
-  cout << grafo->numeroTarefas() << endl;
+  cout << "É bipartido completo: " << grafo->bipartidoCompleto() << endl;
 
-  cout << grafo->numeroMaquinas() << endl;
+  cout << endl;
 
-  cout << grafo->numeroArestas() << endl;
+  grafo->imprime();
 
-  cout << grafo->bipartidoCompleto() << endl;
+  cout << endl;
 
-  // if (grafo->bipartidoCompleto())
-  // {
-  //   Grafo *result = grafo->escalonamento();
-  //   result->imprime();
-  // }else
-  // {
-  //   cout << "Não é um grafo bipartido completo" << endl;
-  // }
+  if (grafo->bipartidoCompleto())
+  {
+    grafo->escalonamento();
+  }
+  else
+  {
+    cout << "Não é um grafo bipartido completo" << endl;
+  }
 }

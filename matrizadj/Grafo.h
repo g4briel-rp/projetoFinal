@@ -45,7 +45,12 @@ public:
   Aresta *primeiroListaAdj(int v);
   Aresta *proxAdj(int v);
   Aresta *retiraAresta(int v1, int v2);
-  void imprime() const;
+
+  int numeroTarefas();
+  int numeroMaquinas();
+  int numeroArestas();
+
+  void imprime();
   int _numVertices() const;
   int _numOperacao();
   Grafo *grafoTransposto();
@@ -78,10 +83,9 @@ public:
 
   void floydWarshall(int raiz, int destino);
 
-  int numeroTarefas();
-  int numeroMaquinas();
-  int numeroArestas();
   bool bipartidoCompleto();
+  int encontrarMenorSomaColuna(int L);
+  void escalonamento();
 
   ~Grafo();
 };
@@ -189,7 +193,7 @@ Grafo::Aresta *Grafo::proxAdj(int v)
   while ((this->pos[v] < this->numVertices) &&
          (this->mat[v][this->pos[v]] == 0))
     this->pos[v]++;
-  if (this->pos[v] == this->numVertices)
+  if (this->pos[v] == this->numVertices + 1)
     return NULL;
   else
     return new Aresta(v, this->pos[v], this->mat[v][this->pos[v]]);
@@ -207,16 +211,41 @@ Grafo::Aresta *Grafo::retiraAresta(int v1, int v2)
   }
 }
 
-void Grafo::imprime() const
+int Grafo::numeroTarefas()
+{
+  int T = 0, aux = -1;
+
+  for (int v = 1; v < this->numVertices; v++)
+    if (!this->listaAdjVazia(v))
+    {
+      Aresta *adj = this->primeiroListaAdj(v);
+      while (adj != NULL && adj->_v1() != aux)
+      {
+        aux = adj->_v1();
+        T++;
+        adj = this->proxAdj(v);
+      }
+    }
+
+  // cout << "aqui: " << T << endl;
+  return T;
+}
+
+int Grafo::numeroMaquinas()
+{
+  return abs(this->numeroTarefas() - this->_numVertices());
+}
+
+void Grafo::imprime()
 {
   cout << "   ";
-  for (int i = 0; i < this->numVertices; i++)
+  for (int i = this->numeroTarefas() + 1; i <= this->numeroTarefas() + this->numeroMaquinas(); i++)
     cout << i << "   ";
   cout << endl;
-  for (int i = 0; i < this->numVertices; i++)
+  for (int i = 1; i <= this->numeroTarefas(); i++)
   {
     cout << i << "  ";
-    for (int j = 0; j < this->numVertices; j++)
+    for (int j = this->numeroTarefas() + 1; j <= this->numeroTarefas() + this->numeroMaquinas(); j++)
       cout << this->mat[i][j] << "   ";
     cout << endl;
   }
@@ -754,53 +783,27 @@ void Grafo::floydWarshall(int raiz, int destino)
     cout << endl;
   }
 
-  cout << endl << "Caminho:";
+  cout << endl
+       << "Caminho:";
 
   this->imprimeCaminho(raiz, destino, antecessor[raiz]);
 
   cout << endl;
 }
 
-int Grafo::numeroTarefas()
-{
-  int T = 0, aux = -1;
-
-  for (int v = 0; v < this->numVertices; v++)
-    if (!this->listaAdjVazia(v))
-    {
-      Aresta *adj = this->primeiroListaAdj(v);
-      while (adj != NULL && adj->_v1() != aux)
-      {
-        aux = adj->_v1();
-        T++;
-        delete adj;
-        adj = this->proxAdj(v);
-      }
-    }
-
-  return T;
-}
-
-int Grafo::numeroMaquinas()
-{
-  return abs(this->numeroTarefas() - this->_numVertices());
-}
-
 int Grafo::numeroArestas()
 {
-  int A = 0;
+  int A = 0, linhas = this->numeroTarefas(), colunas = this->numeroTarefas() + 1;
 
-  for (int v = 0; v < this->numVertices; v++)
-    if (!this->listaAdjVazia(v))
+  for (int i = 1; i <= linhas; i++)
+  {
+    for (int j = colunas; j <= this->numVertices; j++)
     {
-      Aresta *adj = this->primeiroListaAdj(v);
-      while (adj != NULL)
-      {
-        A++;
-        adj = this->proxAdj(v);
-      }
+      // cout << "Aresta [" << i << "][" << j << "] -> peso (" << this->mat[i][j] << ")" << endl;
+      A++;
     }
-  
+  }
+
   return A;
 }
 
@@ -812,38 +815,71 @@ bool Grafo::bipartidoCompleto()
     return false;
 }
 
-int encontraMIN(vector<int> &tempos)
+int Grafo::encontrarMenorSomaColuna(int L)
 {
-  int min = INT_MAX;
+  int numLinhas = L;
+  int numColunas = this->numVertices;
 
-  for (int i: tempos)
+  // Inicializar a menor soma como a soma da primeira coluna
+  int menorSoma = 0;
+  for (int i = 0; i <= numLinhas; i++)
   {
-      if (i < min) {
-          min = i;
-      }
+    menorSoma += this->mat[i][numLinhas + 1];
   }
 
-  auto aux = find(tempos.begin(), tempos.end(), min);
-  int index = aux - tempos.begin();
+  int indiceMenorSoma = numLinhas + 1;
 
-  return index;
+  // Percorrer as colunas e calcular a soma de cada uma
+  for (int j = numLinhas + 1; j <= numColunas; j++)
+  {
+    int somaColuna = 0;
+
+    for (int i = 1; i <= numLinhas; i++)
+    {
+      somaColuna += this->mat[i][j];
+    }
+
+    // Verificar se a soma da coluna atual é menor que a menor soma encontrada até agora
+    if (somaColuna < menorSoma)
+    {
+      menorSoma = somaColuna;
+      indiceMenorSoma = j;
+    }
+  }
+
+  return indiceMenorSoma;
 }
 
-int encontraMAX(vector<int> &tempos)
+void Grafo::escalonamento()
 {
-  int max = INT_MIN;
+  int aux = -1, L = this->numeroTarefas();
+  Grafo *grafoEsc = new Grafo(this->numVertices);
 
-  for (int i: tempos)
+  for (int v = 1; v <= L; v++)
   {
-      if (i > max) {
-          max = i;
-      }
+    aux = grafoEsc->encontrarMenorSomaColuna(L);
+
+    cout << endl;
+
+    if (this->existeAresta(v, aux))
+    {
+      cout << "v: " << v << " || aux: " << aux << " || peso: " << this->mat[v][aux] << endl;
+      cout << "existe" << endl;
+      grafoEsc->insereAresta(v, aux, this->mat[v][aux]);
+      grafoEsc->imprime();
+    }
+    else
+    {
+      cout << "não existe" << endl;
+    }
+    cout << endl;
   }
 
-  auto aux = find(tempos.begin(), tempos.end(), max);
-  int index = aux - tempos.begin();
-
-  return index;
+  cout << "Número de Tarefas: " << grafoEsc->numeroTarefas() << endl;
+  cout << "Número de Máquinas: " << grafoEsc->numeroMaquinas() << endl;
+  cout << "Número de Arestas: " << grafoEsc->numeroArestas() << endl;
+  cout << endl;
+  grafoEsc->imprime();
 }
 
 Grafo::~Grafo()
