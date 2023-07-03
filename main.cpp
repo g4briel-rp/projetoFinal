@@ -7,19 +7,15 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-  ifstream in("problema5_1.txt");
+  // ifstream in("./entradas_v1/problema5_1.txt");
+  ifstream in("input.txt");
   Grafo *grafo = new Grafo(in);
-  cout << "Número de Tarefas: " << grafo->numeroTarefas() << endl;
-
-  cout << "Número de Máquinas: " << grafo->numeroMaquinas() << endl;
-
-  cout << "Número de Arestas: " << grafo->numeroArestas() << endl;
-
-  cout << "É bipartido completo: " << grafo->bipartidoCompleto() << endl;
-
-  cout << endl;
-
   grafo->imprime();
+  cout << endl;
+  cout << "Número de Máquinas: " << grafo->_numMaquinas() << endl;
+  cout << "Número de Tarefas: " << grafo->_numTarefas() << endl;
+  cout << "Número de Arestas: " << grafo->numeroArestas() << endl;
+  cout << "É bipartido completo: " << grafo->bipartidoCompleto() << endl;
 
   cout << endl;
 
