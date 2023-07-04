@@ -121,13 +121,12 @@ Grafo::Grafo(istream &in)
 Grafo::Grafo(int numVertices)
 {
   this->mat = new int *[numVertices];
-  for (int i = 0; i <= numVertices; i++)
+  for (int i = 0; i < numVertices; i++)
     this->mat[i] = new int[numVertices];
   this->pos = new int[numVertices];
-  this->numVertices = numVertices;
-  for (int i = 0; i <= this->numVertices; i++)
+  for (int i = 0; i < numVertices; i++)
   {
-    for (int j = 0; j <= this->numVertices; j++)
+    for (int j = 0; j < numVertices; j++)
       this->mat[i][j] = 0;
     this->pos[i] = -1;
   }
@@ -778,13 +777,13 @@ void Grafo::floydWarshall(int raiz, int destino)
 void Grafo::imprime2(int L, int C)
 {
   cout << "   ";
-  for (int i = L + 1; i <= C; i++)
+  for (int i = L + 1; i <= L + C; i++)
     cout << i << "   ";
   cout << endl;
   for (int i = 1; i <= L; i++)
   {
     cout << i << "  ";
-    for (int j = L + 1; j <= C; j++)
+    for (int j = L + 1; j <= L + C; j++)
       cout << this->mat[i][j] << "   ";
     cout << endl;
   }
@@ -890,7 +889,7 @@ void Grafo::escalonamento()
   }
 
   cout << "Resultado Final: " << endl;
-  grafoEsc->imprime2(this->numMaquinas, this->numVertices);
+  grafoEsc->imprime2(this->numMaquinas, this->numTarefas);
 }
 
 Grafo::~Grafo()
