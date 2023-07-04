@@ -83,9 +83,10 @@ public:
 
   void floydWarshall(int raiz, int destino);
 
+  void imprime2(int L, int C);
   int numeroArestas();
   bool bipartidoCompleto();
-  int encontrarMenorSomaColuna();
+  int encontrarMenorSoma(int maq, int pro);
   void escalonamento();
 
   ~Grafo();
@@ -120,13 +121,13 @@ Grafo::Grafo(istream &in)
 Grafo::Grafo(int numVertices)
 {
   this->mat = new int *[numVertices];
-  for (int i = 0; i < numVertices; i++)
+  for (int i = 0; i <= numVertices; i++)
     this->mat[i] = new int[numVertices];
   this->pos = new int[numVertices];
   this->numVertices = numVertices;
-  for (int i = 0; i < this->numVertices; i++)
+  for (int i = 0; i <= this->numVertices; i++)
   {
-    for (int j = 0; j < this->numVertices; j++)
+    for (int j = 0; j <= this->numVertices; j++)
       this->mat[i][j] = 0;
     this->pos[i] = -1;
   }
@@ -194,10 +195,10 @@ Grafo::Aresta *Grafo::proxAdj(int v)
   // @{\it Retorna a pr\'oxima aresta que o v\'ertice v participa ou}@
   // @{\it {\bf NULL} se a lista de adjac\^encia de v estiver no fim}@
   this->pos[v]++;
-  while ((this->pos[v] < this->numVertices) &&
+  while ((this->pos[v] <= this->numVertices) &&
          (this->mat[v][this->pos[v]] == 0))
     this->pos[v]++;
-  if (this->pos[v] == this->numVertices)
+  if (this->pos[v] == this->numVertices + 1)
     return NULL;
   else
     return new Aresta(v, this->pos[v], this->mat[v][this->pos[v]]);
@@ -774,13 +775,28 @@ void Grafo::floydWarshall(int raiz, int destino)
   cout << endl;
 }
 
+void Grafo::imprime2(int L, int C)
+{
+  cout << "   ";
+  for (int i = L + 1; i <= C; i++)
+    cout << i << "   ";
+  cout << endl;
+  for (int i = 1; i <= L; i++)
+  {
+    cout << i << "  ";
+    for (int j = L + 1; j <= C; j++)
+      cout << this->mat[i][j] << "   ";
+    cout << endl;
+  }
+}
+
 int Grafo::numeroArestas()
 {
   int A = 0, linhas = this->_numMaquinas(), colunas = this->_numTarefas();
 
   for (int i = 1; i <= linhas; i++)
   {
-    for (int j = colunas; j <= this->numVertices; j++)
+    for (int j = linhas + 1; j <= this->numVertices; j++)
     {
       // cout << "Aresta [" << i << "][" << j << "] -> peso (" << this->mat[i][j] << ")" << endl;
       if (this->mat[i][j] != 0)
@@ -799,47 +815,40 @@ bool Grafo::bipartidoCompleto()
     return false;
 }
 
-int Grafo::encontrarMenorSomaColuna()
+int Grafo::encontrarMenorSoma(int maq, int pro)
 {
-  // Inicializar a menor soma como a soma da primeira coluna
-  int menorSoma = 0;
-  for (int i = 1; i <= numMaquinas; i++)
+  int menorSoma = 99999;
+  int indiceLinhaMenorSoma = 1;
+
+  for (int i = 1; i <= maq; ++i)
   {
-    menorSoma += this->mat[i][numMaquinas + 1];
-  }
+    int somaLinha = 0;
 
-  int indiceMenorSoma = numMaquinas + 1;
-
-  // Percorrer as colunas e calcular a soma de cada uma
-  for (int j = numMaquinas + 1; j <= numVertices; j++)
-  {
-    int somaColuna = 0;
-
-    for (int i = 1; i <= numMaquinas; i++)
+    for (int j = maq + 1; j <= maq + pro; ++j)
     {
-      somaColuna += this->mat[i][j];
+      somaLinha += this->mat[i][j];
     }
 
-    // Verificar se a soma da coluna atual é menor que a menor soma encontrada até agora
-    if (somaColuna < menorSoma)
+    if (somaLinha < menorSoma)
     {
-      menorSoma = somaColuna;
-      indiceMenorSoma = j;
+      menorSoma = somaLinha;
+      indiceLinhaMenorSoma = i;
     }
   }
 
-  return indiceMenorSoma;
+  return indiceLinhaMenorSoma;
 }
 
 void Grafo::escalonamento()
 {
-  int aux = -1, verifica = -1;
-  Grafo *grafoEsc = new Grafo(this->numVertices);
+  int aux = -1;
+  bool contem;
+  Grafo *grafoEsc = new Grafo(this->_numVertices() + 1);
 
   vector<Aresta> A;
+  vector<int> verifica;
 
-  // adiciona as arestas em A
-  for (int v = 1; v <= numMaquinas; v++)
+  for (int v = 1; v <= this->numMaquinas; v++)
   {
     if (!this->listaAdjVazia(v))
     {
@@ -847,6 +856,7 @@ void Grafo::escalonamento()
 
       while (adj != NULL)
       {
+        // cout << "v1: " << adj->_v1() << " v2: " << adj->_v2() << " peso: " << adj->_peso() << endl;
         A.push_back(*adj);
         delete adj;
         adj = this->proxAdj(v);
@@ -854,54 +864,33 @@ void Grafo::escalonamento()
     }
   }
 
-  // ordena as arestas pelo peso
   sort(A.begin(), A.end());
 
-  // Imprimir o vector A ordenado decrescente
   for (auto a : A)
   {
-    // cout << a._v1() << " - " << a._peso() << "||";
-    if (a._v1() != verifica)
+    contem = false;
+    aux = grafoEsc->encontrarMenorSoma(this->numMaquinas, this->numTarefas);
+    // cout << "menor indice: " << aux << endl;
+    // cout << "a_v1: " << a._v1() << " a_v2: " << a._v2() << " peso: " << a._peso() << endl;
+
+    for (auto v : verifica)
     {
-      verifica = a._v1();
-      aux = grafoEsc->encontrarMenorSomaColuna();
-      if (this->existeAresta(a._v1(), aux))
+      if (v == a._v2())
       {
-        cout << "v: " << a._v1() << " || aux: " << aux << " || peso: " << this->mat[a._v1()][aux] << endl;
-        cout << "existe" << endl;
-        grafoEsc->insereAresta(a._v1(), aux, this->mat[a._v1()][aux]);
-        // grafoEsc->imprime2(L, C);
+        contem = true;
+        break;
       }
-      else
-      {
-        // cout << "não existe" << endl;
-      }
-      // cout << endl;
+    }
+
+    if (this->existeAresta(aux, a._v2()) && contem == false)
+    {
+      grafoEsc->insereAresta(aux, a._v2(), a._peso());
+      verifica.push_back(a._v2());
     }
   }
 
-  // for (int v = 1; v <= L; v++)
-  // {
-  //   aux = grafoEsc->encontrarMenorSomaColuna(L);
-
-  //   cout << endl;
-
-  //   if (this->existeAresta(v, aux))
-  //   {
-  //     cout << "v: " << v << " || aux: " << aux << " || peso: " << this->mat[v][aux] << endl;
-  //     cout << "existe" << endl;
-  //     grafoEsc->insereAresta(v, aux, this->mat[v][aux]);
-  //     grafoEsc->imprime2(L, C);
-  //   }
-  //   else
-  //   {
-  //     cout << "não existe" << endl;
-  //   }
-  //   cout << endl;
-  // }
-
   cout << "Resultado Final: " << endl;
-  grafoEsc->imprime();
+  grafoEsc->imprime2(this->numMaquinas, this->numVertices);
 }
 
 Grafo::~Grafo()

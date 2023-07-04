@@ -8,7 +8,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
   // ifstream in("./entradas_v1/problema5_1.txt");
-  ifstream in("input.txt");
+  ifstream in("input4.txt");
   Grafo *grafo = new Grafo(in);
   grafo->imprime();
   cout << endl;
