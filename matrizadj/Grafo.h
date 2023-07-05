@@ -777,12 +777,12 @@ void Grafo::floydWarshall(int raiz, int destino)
 void Grafo::imprime2(int L, int C)
 {
   cout << "   ";
-  for (int i = L + 1; i <= L + C; i++)
-    cout << i << "   ";
+  // for (int i = L + 1; i <= L + C; i++)
+  //   cout << i << "   ";
   cout << endl;
   for (int i = 1; i <= L; i++)
   {
-    cout << i << "  ";
+    // cout << i << "  ";
     for (int j = L + 1; j <= L + C; j++)
       cout << this->mat[i][j] << "   ";
     cout << endl;
@@ -883,13 +883,26 @@ void Grafo::escalonamento()
 
     if (this->existeAresta(aux, a._v2()) && contem == false)
     {
-      grafoEsc->insereAresta(aux, a._v2(), a._peso());
+      // cout << "a_v1: " << aux << " a_v2: " << a._v2() << " peso: " << a._peso() << endl;
+      grafoEsc->insereAresta(aux, a._v2(), this->mat[aux][a._v2()]);
       verifica.push_back(a._v2());
     }
   }
 
   cout << "Resultado Final: " << endl;
-  grafoEsc->imprime2(this->numMaquinas, this->numTarefas);
+  // grafoEsc->imprime2(this->numMaquinas, this->numTarefas);
+
+  int soma;
+
+  for (int n = 1; n <= this->numMaquinas; n++)
+  {
+    soma = 0;
+    for (int m = this->numMaquinas + 1; m <= this->numVertices; m++)
+    {
+      soma += grafoEsc->mat[n][m];
+    }
+    cout << "Máquina " << n << ": " << soma << endl;
+  }
 }
 
 Grafo::~Grafo()
